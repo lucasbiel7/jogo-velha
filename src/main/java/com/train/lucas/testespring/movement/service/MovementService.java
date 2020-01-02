@@ -2,6 +2,7 @@ package com.train.lucas.testespring.movement.service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.train.lucas.testespring.game.model.Game;
 import com.train.lucas.testespring.game.model.Player;
-import com.train.lucas.testespring.game.repository.GameRepository;
+import com.train.lucas.testespring.game.service.GameService;
 import com.train.lucas.testespring.movement.model.Movement;
 import com.train.lucas.testespring.movement.model.Position;
 import com.train.lucas.testespring.movement.repository.MovementRepository;
@@ -26,11 +27,14 @@ public class MovementService {
 	private MovementRepository movementRepository;
 
 	@Autowired
-	private GameRepository gameRepository;
+	private GameService gameService;
 
 	public Optional<String> movement(MoveResource moveResource) {
-		Game game = gameRepository.findById(moveResource.getId())
+		Game game = gameService.findGame(moveResource.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Partida não encontrada"));
+		if (Objects.nonNull(game.getWinner())) {
+			return Optional.of(game.getWinner().getName());
+		}
 		List<Movement> movements = movementRepository.findByGame(game).stream()
 				.sorted((move1, move2) -> move1.getCreated().compareTo(move2.getCreated()) * -1)
 				.collect(Collectors.toList());
@@ -39,12 +43,31 @@ public class MovementService {
 		Movement movement = createMovement(moveResource, game, actualPlayer);
 		validatePosition(movements, movement.getPosition());
 		movements.add(0, movementRepository.save(movement));
-		return validateWinner(movements);
+		paint(movements);
+		return validateWinner(movements, game);
 	}
 
-	private Optional<String> validateWinner(List<Movement> movements) {
+	private void paint(List<Movement> movements) {
+		System.out.println("--------------------------------------------------------------------");
+		for (int i = 0; i <= DIMENSION_LIMIT; i++) {
+			for (int j = 0; j <= DIMENSION_LIMIT; j++) {
+				Position position = new Position(i, j);
+				Optional<Movement> move = movements.stream().filter(movement -> movement.getPosition().equals(position))
+						.findFirst();
+				System.out.print("|");
+				move.map(Movement::getPlayer).ifPresentOrElse(System.out::print, () -> System.out.print(" "));
+			}
+			System.out.println();
+		}
+
+	}
+
+	private Optional<String> validateWinner(List<Movement> movements, Game game) {
 		Optional<String> optional = Optional.ofNullable(null);
 		Optional<Movement> ultimaJogada = movements.stream().findFirst();
+		int numberOfMovements = movements.size();
+		movements = movements.stream().filter(movement -> movement.getPlayer().equals(ultimaJogada.get().getPlayer()))
+				.collect(Collectors.toList());
 		Integer x = ultimaJogada.get().getPosition().getX();
 		Integer y = ultimaJogada.get().getPosition().getY();
 		int linha = 0, coluna = 0, diagonalPrincipal = 0, diagonalSecundaria = 0;
@@ -71,6 +94,11 @@ public class MovementService {
 		if (Arrays.asList(linha, coluna, diagonalPrincipal, diagonalSecundaria).stream()
 				.anyMatch(Integer.valueOf(3)::equals)) {
 			optional = Optional.of(ultimaJogada.get().getPlayer().getName());
+			gameService.winner(ultimaJogada.get().getPlayer(), game);
+		}
+
+		if (numberOfMovements == 9 && optional.isEmpty()) {
+			optional = Optional.of("Draw");
 		}
 
 		return optional;

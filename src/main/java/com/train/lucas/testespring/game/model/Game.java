@@ -9,6 +9,8 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Game {
 
 	@Id
@@ -28,5 +31,8 @@ public class Game {
 	private String id;
 	@Enumerated(EnumType.STRING)
 	private Player firstPlayer;
+
+	@Enumerated(EnumType.STRING)
+	private Player winner;
 
 }

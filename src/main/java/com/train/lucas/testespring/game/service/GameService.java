@@ -1,5 +1,7 @@
 package com.train.lucas.testespring.game.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +19,14 @@ public class GameService {
 		Game game = new Game();
 		game.setFirstPlayer(Player.generateFirstPlayer());
 		return gameRepository.save(game);
+	}
+
+	public Optional<Game> findGame(String id) {
+		return gameRepository.findById(id);
+	}
+
+	public void winner(Player player, Game game) {
+		game.setWinner(player);
+		gameRepository.save(game);
 	}
 }

@@ -20,6 +20,8 @@ import com.train.lucas.testespring.movement.resource.MoveResource;
 @Service
 public class MovementService {
 
+	private static final int DIMENSION_LIMIT = 2;
+
 	@Autowired
 	private MovementRepository movementRepository;
 
@@ -47,7 +49,7 @@ public class MovementService {
 		Integer y = ultimaJogada.get().getPosition().getY();
 		int linha = 0, coluna = 0, diagonalPrincipal = 0, diagonalSecundaria = 0;
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i <= DIMENSION_LIMIT; i++) {
 
 			Position positionLinha = new Position(x, i);
 			linha += hasPosition(positionLinha, movements);
@@ -60,8 +62,8 @@ public class MovementService {
 				diagonalPrincipal += hasPosition(positionDiagonPrincipal, movements);
 			}
 
-			if (x + y == 2) {
-				Position positionDiagonalSecundaria = new Position(2 - i, i);
+			if (x + y == DIMENSION_LIMIT) {
+				Position positionDiagonalSecundaria = new Position(DIMENSION_LIMIT - i, i);
 				diagonalSecundaria += hasPosition(positionDiagonalSecundaria, movements);
 			}
 		}

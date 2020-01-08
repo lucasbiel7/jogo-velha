@@ -111,8 +111,8 @@ public class GameServiceTest {
 	@Test
 	public void createGame_thenWinnerOAndVerifyX() {
 		Game game = gameService.createGame();
-		gameService.winner(Player.X, game);
-		assertNotEquals(Player.O, game.getWinner());
+		gameService.winner(Player.O, game);
+		assertNotEquals(Player.X, game.getWinner());
 	}
 
 }

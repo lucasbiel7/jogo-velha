@@ -50,12 +50,14 @@ public class GameServiceTest {
 		assertNotNull(findGame.get());
 	}
 
+	@DisplayName("Testando quando não existe game com o id igual á 1")
 	@Test
 	public void findGame_thenFindGameNotExist1() {
 		Optional<Game> findGame = gameService.findGame("1");
 		assertThrows(NoSuchElementException.class, () -> findGame.get());
 	}
 
+	@DisplayName("Testando quando não existe game com o id igual á 2")
 	@Test
 	public void findGame_thenFindGameNotExist2() {
 		Optional<Game> findGame = gameService.findGame("2");

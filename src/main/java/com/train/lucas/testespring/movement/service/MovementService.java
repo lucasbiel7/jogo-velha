@@ -21,6 +21,10 @@ import com.train.lucas.testespring.movement.resource.MoveResource;
 @Service
 public class MovementService {
 
+	public static final String TURNO_INCORRETO = "Não é o turno do jogador";
+
+	public static final String PARTIDA_NAO_ENCONTRADA = "Partida não encontrada";
+
 	private static final int DIMENSION_LIMIT = 2;
 
 	@Autowired
@@ -31,7 +35,7 @@ public class MovementService {
 
 	public Optional<String> movement(MoveResource moveResource) {
 		Game game = gameService.findGame(moveResource.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Partida não encontrada"));
+				.orElseThrow(() -> new IllegalArgumentException(PARTIDA_NAO_ENCONTRADA));
 		if (Objects.nonNull(game.getWinner())) {
 			return Optional.of(game.getWinner().getName());
 		}
@@ -121,7 +125,7 @@ public class MovementService {
 
 	private void validateTurnoOfPlayer(Game game, Player actualPlayer, List<Movement> movements) {
 		Optional<Movement> last = movements.stream().findFirst();
-		Supplier<IllegalArgumentException> error = () -> new IllegalArgumentException("Não é o turno do jogador");
+		Supplier<IllegalArgumentException> error = () -> new IllegalArgumentException(TURNO_INCORRETO);
 		if (last.isPresent()) {
 			if (last.get().getPlayer().equals(actualPlayer)) {
 				throw error.get();

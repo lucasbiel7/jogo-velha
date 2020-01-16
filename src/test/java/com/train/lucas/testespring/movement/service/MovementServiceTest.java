@@ -84,10 +84,7 @@ public class MovementServiceTest {
 	@DisplayName("Jogar primeiro movimento na vez de outro jogador")
 	@Test
 	public void movement_whenOtherPlayerCanBePlay() {
-		MoveResource moveResource = new MoveResource();
-		moveResource.setPlayer("X");
-		moveResource.setPosition(new PositionResource(0, 0));
-		moveResource.setId(ID_TESTE_O);
+		MoveResource moveResource = new MoveResource(ID_TESTE_O, Player.X.getName(), new PositionResource(0, 0));
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
 				() -> movementService.movement(moveResource), () -> MovementService.TURNO_INCORRETO);
 		assertEquals(e.getMessage(), MovementService.TURNO_INCORRETO);
@@ -98,20 +95,13 @@ public class MovementServiceTest {
 	public void movement_whenPlayInSamePosition() {
 		PositionResource position = new PositionResource(0, 0);
 
-		MoveResource moveResource1 = new MoveResource();
-		moveResource1.setPlayer("O");
-		moveResource1.setPosition(position);
-		moveResource1.setId(ID_TESTE_O);
-
-		MoveResource moveResource2 = new MoveResource();
-		moveResource2.setPlayer("X");
-		moveResource2.setPosition(position);
-		moveResource2.setId(ID_TESTE_O);
+		MoveResource moveResource1 = new MoveResource(ID_TESTE_O, Player.O.getName(), position);
+		MoveResource moveResource2 = new MoveResource(ID_TESTE_O, Player.X.getName(), position);
 
 		assertEquals(movementService.movement(moveResource1), Optional.ofNullable(null));
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
 				() -> movementService.movement(moveResource2), () -> MovementService.POSICAO_JOGADA);
 		assertEquals(e.getMessage(), MovementService.POSICAO_JOGADA);
-
 	}
+
 }

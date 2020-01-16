@@ -21,6 +21,8 @@ import com.train.lucas.testespring.movement.resource.MoveResource;
 @Service
 public class MovementService {
 
+	public static final String POSICAO_JOGADA = "Já foi realizado uma jogada nessa posição!";
+
 	public static final String TURNO_INCORRETO = "Não é o turno do jogador";
 
 	public static final String PARTIDA_NAO_ENCONTRADA = "Partida não encontrada";
@@ -139,7 +141,7 @@ public class MovementService {
 
 	private void validatePosition(List<Movement> movements, Position position) {
 		if (movements.stream().map(Movement::getPosition).anyMatch(position::equals)) {
-			throw new IllegalArgumentException("Já foi realizado uma jogada nessa posição!");
+			throw new IllegalArgumentException(POSICAO_JOGADA);
 		}
 	}
 

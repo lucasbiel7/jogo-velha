@@ -21,6 +21,8 @@ import com.train.lucas.testespring.movement.resource.MoveResource;
 @Service
 public class MovementService {
 
+	public static final String DRAW = "Draw";
+
 	public static final String POSICAO_JOGADA = "Já foi realizado uma jogada nessa posição!";
 
 	public static final String TURNO_INCORRETO = "Não é o turno do jogador";
@@ -104,7 +106,7 @@ public class MovementService {
 		}
 
 		if (numberOfMovements == 9 && optional.isEmpty()) {
-			optional = Optional.of("Draw");
+			optional = Optional.of(DRAW);
 		}
 
 		return optional;

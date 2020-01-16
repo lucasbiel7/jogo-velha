@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -34,7 +37,10 @@ public class MovementServiceTest {
 	private static final String ID_TESTE_O = "ID_TESTE_O";
 	private static final String WITHOUT_GAME = "WITHOUT_GAME";
 
+	private static final String ID_DRAW_GAME = "ID_DRAW_GAME";
+
 	private final Game GAME_START_O = new Game(ID_TESTE_O, Player.O, null);
+	private final Game GAME_DRAW = new Game(ID_DRAW_GAME, Player.X, null);
 
 	@Autowired
 	private MovementService movementService;
@@ -51,12 +57,14 @@ public class MovementServiceTest {
 	public void setup() {
 		movements = new HashSet<>();
 		when(gameService.findGame(ID_TESTE_O)).thenReturn(Optional.of(GAME_START_O));
+		when(gameService.findGame(ID_DRAW_GAME)).thenReturn(Optional.of(GAME_DRAW));
 		when(movementRepository.save(ArgumentMatchers.any())).then(invocation -> {
 			Object arg1 = invocation.getArguments()[0];
 			if (arg1 instanceof Movement) {
 				Movement movement = (Movement) arg1;
 				if (Objects.isNull(movement.getId())) {
 					movement.setId(new Random().nextInt());
+					movement.setCreated(new Date());
 					movements.add(movement);
 				}
 			}
@@ -102,6 +110,26 @@ public class MovementServiceTest {
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
 				() -> movementService.movement(moveResource2), () -> MovementService.POSICAO_JOGADA);
 		assertEquals(e.getMessage(), MovementService.POSICAO_JOGADA);
+	}
+
+	@DisplayName("Verificando se o jogo marca com empate corretamente")
+	@Test
+	public void movement_drawGame() {
+		List<MoveResource> moves = Arrays.asList(
+				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 0)),
+				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(1, 0)),
+				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 1)),
+				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(0, 2)),
+				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 1)),
+				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 2)),
+				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 2)),
+				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 1)),
+				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(2, 0)));
+		for (int i = 0; i < moves.size(); i++) {
+			Optional<String> result;
+			result = i == moves.size() - 1 ? Optional.of(MovementService.DRAW) : Optional.ofNullable(null);
+			assertEquals(movementService.movement(moves.get(i)), result);
+		}
 	}
 
 }

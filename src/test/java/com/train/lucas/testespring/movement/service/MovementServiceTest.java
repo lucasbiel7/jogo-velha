@@ -1,24 +1,25 @@
 package com.train.lucas.testespring.movement.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import com.train.lucas.testespring.movement.resource.MoveResource;
 import com.train.lucas.testespring.movement.resource.PositionResource;
 
 @SpringBootTest
+@Tag("Teste do serviço de movimento")
 public class MovementServiceTest {
 
 	private static final String ID_TESTE_O = "ID_TESTE_O";
@@ -55,24 +57,26 @@ public class MovementServiceTest {
 	@MockBean
 	private MovementRepository movementRepository;
 
-	private Set<Movement> movements;
+	private List<Movement> movements;
 
 	@BeforeEach
 	public void setup() {
-		movements = new HashSet<>();
+		movements = new LinkedList<>();
 		when(gameService.findGame(ID_TESTE_O)).thenReturn(Optional.of(GAME_START_O));
 		when(gameService.findGame(ID_DRAW_GAME)).thenReturn(Optional.of(GAME_DRAW));
 		when(gameService.findGame(ID_GAME_WIN_X)).thenReturn(Optional.of(GAME_WIN_X));
 		when(gameService.findGame(WITHOUT_GAME)).thenReturn(Optional.empty());
+		Calendar calendar = Calendar.getInstance();
 		when(movementRepository.save(ArgumentMatchers.any())).then(invocation -> {
 			Object arg1 = invocation.getArguments()[0];
 			if (arg1 instanceof Movement) {
 				Movement movement = (Movement) arg1;
 				if (Objects.isNull(movement.getId())) {
 					movement.setId(new Random().nextInt());
-					movement.setCreated(new Date());
+					movement.setCreated(calendar.getTime());
 					movements.add(movement);
 				}
+				calendar.add(Calendar.SECOND, 1);
 			}
 			return arg1;
 		});
@@ -122,19 +126,22 @@ public class MovementServiceTest {
 	@Test
 	public void movement_drawGame() {
 		Logger.getLogger(getClass().getName()).log(Level.INFO, "Draw start -----------------------------");
-		List<MoveResource> moves = Arrays.asList(
-				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 0)),
-				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(1, 0)),
-				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 1)),
-				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(0, 2)),
-				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 1)),
-				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 2)),
-				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 2)),
-				new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 1)),
-				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(2, 0)));
+		List<MoveResource> moves = new LinkedList<>();
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 0)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(1, 0)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(0, 1)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(0, 2)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 1)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 2)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(1, 2)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.O.getName(), new PositionResource(2, 1)));
+		moves.add(new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(2, 0)));
 		for (int i = 0; i < moves.size(); i++) {
-			Optional<String> result = i == moves.size() - 1 ? Optional.of(MovementService.DRAW) : Optional.empty();
-			assertEquals(movementService.movement(moves.get(i)).orElse(null), result.orElse(null));
+			if (i == moves.size() - 1) {
+				assertEquals(movementService.movement(moves.get(i)).get(), MovementService.DRAW);
+			} else {
+				assertTrue(movementService.movement(moves.get(i)).isEmpty());
+			}
 		}
 		Logger.getLogger(getClass().getName()).log(Level.INFO, "Draw end -----------------------------");
 	}
@@ -149,16 +156,18 @@ public class MovementServiceTest {
 	@DisplayName("Ganhando com jogador x na diagonal principal")
 	@Test
 	public void movement_XWinGame() {
-		List<MoveResource> moves = Arrays.asList(
-				new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(1, 1)),
-				new MoveResource(ID_GAME_WIN_X, Player.O.getName(), new PositionResource(1, 2)),
-				new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(0, 1)),
-				new MoveResource(ID_GAME_WIN_X, Player.O.getName(), new PositionResource(0, 2)),
-				new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(2, 1)));
+		List<MoveResource> moves = new LinkedList<>();
+		moves.add(new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(1, 1)));
+		moves.add(new MoveResource(ID_GAME_WIN_X, Player.O.getName(), new PositionResource(1, 2)));
+		moves.add(new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(0, 1)));
+		moves.add(new MoveResource(ID_GAME_WIN_X, Player.O.getName(), new PositionResource(0, 2)));
+		moves.add(new MoveResource(ID_GAME_WIN_X, Player.X.getName(), new PositionResource(2, 1)));
 		for (int i = 0; i < moves.size(); i++) {
-			Optional<String> result = i == moves.size() - 1 ? Optional.ofNullable(Player.X.getName())
-					: Optional.empty();
-			assertEquals(movementService.movement(moves.get(i)).orElse(null), result.orElse(null));
+			if (i == moves.size() - 1) {
+				assertEquals(movementService.movement(moves.get(i)).get(), Player.X.getName());
+			} else {
+				assertNull(movementService.movement(moves.get(i)).orElse(null));
+			}
 		}
 	}
 

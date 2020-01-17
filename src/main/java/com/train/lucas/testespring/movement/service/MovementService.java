@@ -51,7 +51,7 @@ public class MovementService {
 		Movement movement = createMovement(moveResource, game, actualPlayer);
 		validatePosition(movements, movement.getPosition());
 		movements.add(0, movementRepository.save(movement));
-//		paint(movements);
+		paint(movements);
 		return validateWinner(movements, game);
 	}
 

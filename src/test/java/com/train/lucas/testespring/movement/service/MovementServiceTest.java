@@ -134,7 +134,7 @@ public class MovementServiceTest {
 				new MoveResource(ID_DRAW_GAME, Player.X.getName(), new PositionResource(2, 0)));
 		for (int i = 0; i < moves.size(); i++) {
 			Optional<String> result = i == moves.size() - 1 ? Optional.of(MovementService.DRAW) : Optional.empty();
-			assertEquals(movementService.movement(moves.get(i)), result);
+			assertEquals(movementService.movement(moves.get(i)).orElse(null), result.orElse(null));
 		}
 		Logger.getLogger(getClass().getName()).log(Level.INFO, "Draw end -----------------------------");
 	}
@@ -158,7 +158,7 @@ public class MovementServiceTest {
 		for (int i = 0; i < moves.size(); i++) {
 			Optional<String> result = i == moves.size() - 1 ? Optional.ofNullable(Player.X.getName())
 					: Optional.empty();
-			assertEquals(movementService.movement(moves.get(i)), result);
+			assertEquals(movementService.movement(moves.get(i)).orElse(null), result.orElse(null));
 		}
 	}
 

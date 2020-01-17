@@ -51,7 +51,7 @@ public class MovementService {
 		Movement movement = createMovement(moveResource, game, actualPlayer);
 		validatePosition(movements, movement.getPosition());
 		movements.add(0, movementRepository.save(movement));
-		paint(movements);
+//		paint(movements);
 		return validateWinner(movements, game);
 	}
 
@@ -71,7 +71,7 @@ public class MovementService {
 	}
 
 	private Optional<String> validateWinner(List<Movement> movements, Game game) {
-		Optional<String> optional = Optional.ofNullable(null);
+		Optional<String> optional = Optional.empty();
 		Optional<Movement> ultimaJogada = movements.stream().findFirst();
 		int numberOfMovements = movements.size();
 		movements = movements.stream().filter(movement -> movement.getPlayer().equals(ultimaJogada.get().getPlayer()))

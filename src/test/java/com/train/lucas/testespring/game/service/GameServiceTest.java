@@ -40,7 +40,7 @@ public class GameServiceTest {
 			if (ID_GAME.equals(invocation.getArguments()[0])) {
 				return Optional.of(game);
 			}
-			return Optional.ofNullable(null);
+			return Optional.empty();
 		});
 		when(gameRepository.save(ArgumentMatchers.any(Game.class))).then(invocation -> {
 			Game newGame = null;
